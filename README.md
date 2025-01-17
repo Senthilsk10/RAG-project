@@ -21,14 +21,14 @@
 - **Action**: Click the **Listen** button.
 - **Command**: Say your query, e.g., "Hey, <some query>".
 - **Process**: The system fetches relevant data based on the query.  
-  !(listen button)[https://github.com/Senthilsk10/RAG-project/blob/main/images/btn.png?raw=true]
+  ![listen button](https://github.com/Senthilsk10/RAG-project/blob/main/images/btn.png?raw=true)
 
 ##### **2. Translation of Selected Text**
 - **Action**: After the data is fetched:
   - Click on the text result to select it.
   - A **Translate** button will appear. Click it to translate the selected text into any desired language.  
   
-  !(translate button)[https://github.com/Senthilsk10/RAG-project/blob/main/images/translate.png?raw=true]
+  ![translate button](https://github.com/Senthilsk10/RAG-project/blob/main/images/translate.png?raw=true)
   
 ##### **3. Text-to-Speech**
 - **Action**: After selecting the text, say:
@@ -39,14 +39,14 @@
 - **Action**: To limit the number of results displayed, say:
   - **"Show n results"** (replace `n` with your desired number).  
   
-  !(result limit)[https://github.com/Senthilsk10/RAG-project/blob/main/images/result-limit.png?raw=true]
+  ![result limit](https://github.com/Senthilsk10/RAG-project/blob/main/images/result-limit.png?raw=true)
 
 ##### **5. MongoDB Data Management**
 - At the top of the website, there are two links:
   1. **Show Extracted Data**: Displays data stored in the MongoDB database.
   2. **Delete Data**: Provides an option to delete specific entries from the database.  
   
-  !(text and image data)[https://github.com/Senthilsk10/RAG-project/blob/main/images/text-image-page.png?raw=true]
+  ![text and image data](https://github.com/Senthilsk10/RAG-project/blob/main/images/text-image-page.png?raw=true)
 ---
 
 #### **Setup and Running Instructions**
