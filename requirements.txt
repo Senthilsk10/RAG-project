@@ -1,0 +1,5 @@
+watchdog 
+requests  
+PyMuPDF 
+huggingface_hub 
+pymongo[srv]
