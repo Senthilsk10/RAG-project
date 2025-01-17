@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Display Data</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.css" />
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+    <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+    rel="stylesheet">
+    <script>
+        $(document).ready(function() { $('#table').DataTable()}); 
+        // Function to handle delete button click 
+        window.deleteDoc = function(id) { 
+            console.log(`/delete/${id}`);
+            let type = null;
+            if(window.location.href.split('/')[4] == "image"){
+                type = "image";
+            }else{
+                type="text"
+            }
+
+            fetch(`/delete/${type}/${id}`, {method: 'DELETE'}) 
+            .then(response => response.json()) 
+            .then(data => { 
+                if (data.result === 'success') { 
+                    window.location.reload(); 
+                } 
+            }); 
+        }
+    </script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-item nav-link active" href="/">Home</a>
+            <a class="nav-item nav-link" href="/list/text">Text Data</a>
+            <a class="nav-item nav-link" href="/list/image">Image Data</a>
+          </div>
+        </div>
+      </nav>
+    
+    <div class="container mt-4">
+        <table border="1" id="table">
+            <thead>
+                <tr>
+                    {% for key in data[0].keys() %}
+                        <th>{{ key }}</th>
+                    {% endfor %}
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in data %}
+                    <tr>
+                        {% for key, val in doc.items() %}
+                            <td>{{ val }}</td>
+                        {% endfor %}
+                        <td><button onclick="deleteDoc('{{ doc['_id'] }}')" class="btn btn-danger btn-sm">Delete</button></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Required Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

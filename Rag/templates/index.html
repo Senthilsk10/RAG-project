@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Query Assistant</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    #result-div{
+      display: none;
+    }
+    #google_translate_element{
+      display:none;
+    }
+    .response-container {
+      margin-top: 20px;
+    }
+    .images-section img {
+      max-width: 100%;
+      height: auto;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 5px;
+    }
+    .text-section {
+      padding: 10px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    #currentText, #result {
+      padding: 10px;
+      /* background-color: #f8f9fa; */
+      /* border: 1px solid #ddd; */
+      /* border-radius: 5px; */
+    }
+    #limitDisplay {
+      font-style: italic;
+      color: #6c757d;
+    }
+    /* styles.css */
+body.loading #loading-screen {
+    display: flex;
+}
+
+body.loading #content {
+    pointer-events: none;
+    opacity: 0.9;
+}
+
+#loading-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.spinner {
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+p {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-top: 20px;
+}
+
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+</div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-item nav-link active" href="/">Home</a>
+      <a class="nav-item nav-link" href="/list/text">Text Data</a>
+      <a class="nav-item nav-link" href="/list/image">Image Data</a>
+    </div>
+  </div>
+</nav>
+
+  <div id="top">
+    <h1 class="text-center mb-4">Voice Query Assistant</h1>
+    <div class="d-flex justify-content-around align-items-center mb-5">
+      <button onclick="toggleListening()" id="toggleBtn" class="btn btn-light btn-round btn-outline ">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABpUlEQVR4nM3Uu2pVQRQG4K8RY7QTIyJeEhGSQkSfIGgU0UJfIYW1aO+l09iJaCEW3vICajBgcWwVQQsvpZaCUbwrGFEG/sDmsA9n73gEf1js2ev2r5lZs/hPsBFncCdyGhvaJjmPAzX6g/iERbyMLEZX5190M93KffiNaWzHTazCVnzFE4xX/Mej+4LNGMatxE4n11SV4DLeYgVu4B2GsqufGK2pdDS2cymmxFxLjgVcqjrP4VHW5Xs36/lU2gtPca+S42Elx1z3DhbCfj3VlKo6kV5YsvfdwVSPO+g0JBhOTPUO9nY7z9R0RachQd8uapOgjb0WazGbb6chQTWmLyZzhpMtCKoxrQjm04r92rQVwe44H85llcc0VuM3FttZHEnMriYEa/ANF7Al46BUOlHxmYjuMzbhYkbKag1xFd+xI233sWvY/cIH7MdO/MAVLTCC13iDPRnNp3A7chLr80CLzyus0xLlVT7P2ZZOOYZDkbJ+ENszbLNMDOEEXiRZVQr5caw0IIzgcaSs/wk6yxkN/XAU9yPvI0v/xTZQgm4ZCMFf4Q9pX4ibnRzRhQAAAABJRU5ErkJggg==" alt="external-voice-assistant-smart-home-tanah-basah-basic-outline-tanah-basah">
+        listen
+      </button>
+      <div class="status text-center" id="status">Not listening</div>
+      <button onclick="submitCurrentQuery()" id="submitBtn" class="btn btn-light btn-outline" disabled>
+        Submit
+        <img width="28" height="28" src="https://img.icons8.com/fluency/48/submit-for-approval.png" alt="submit-for-approval"/>
+      </button>
+      <div id="google_translate_element" class="mb-4"></div>
+      <hr>
+    </div>
+    <div class="row">
+      <div id="limitDisplay" class="text-center mb-4 col-6">Current limit: 5 results</div>
+      <div class="col-6"><strong>current text: </strong><div id="currentText" class="mb-3"></div></div>
+    
+    </div>
+    
+    
+    <div class="response-container" id="result-div">
+      <h2 class="mb-3 text-center">Images Results</h2>
+      <div class="images-section row row-cols-1 row-cols-sm-1 row-cols-md-2 g-5 text-center" id="imagesSection">
+        <!-- Images will be inserted here -->
+      </div>
+    
+      <h2 class="mt-4 mb-3 text-center">Text Content Results</h2>
+      <div class="text-section" id="textSection">
+        <!-- Text content will be inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+  </script>
+  
+    <script>
+              let recognition = null;
+              let isListening = false;
+              let currentText = '';
+              let queryTimeout = null;
+              let resultLimit = 5; // Default limit
+              let selectedId;
+              let selectedText;
+              let utterance = null;
+
+              function initSpeechRecognition() {
+                  recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                  recognition.continuous = true;
+                  recognition.interimResults = true;
+
+                  recognition.onresult = (event) => {
+                      const transcript = Array.from(event.results)
+                          .map(result => result[0].transcript)
+                          .join('');
+
+                      const lowerTranscript = transcript.toLowerCase();
+
+                      // Check for limit change command
+                      if (lowerTranscript.includes('show') && lowerTranscript.includes('results')) {
+                          const numbers = transcript.match(/\d+/);
+                          if (numbers) {
+                              resultLimit = parseInt(numbers[0]);
+                              document.getElementById('limitDisplay').textContent =
+                                  `Current limit: ${resultLimit} results`;
+                                  stopListening();
+                          }
+                      }
+                      if (lowerTranscript.includes('read') || lowerTranscript.includes('recite')) {
+                          if(selectedText){
+                              readAloud(selectedText);
+                          }else{
+                              readAloud("please select a text to read");
+                          }
+                      }
+                      if (lowerTranscript.includes('stop')) {
+                          console.log('triggered stop');
+                          stopListening();
+                          stopReadingAloud();
+                      }
+
+                      // Check for wake word
+                      if (lowerTranscript.includes('hey ') ||
+                          lowerTranscript.includes('hi ')) {
+
+                          // Remove wake word and clean text
+                          currentText = transcript
+                              .toLowerCase()
+                              .replace('hey vox', '')
+                              .replace('hi vox', '')
+                              .trim();
+
+                          document.getElementById('currentText').textContent = currentText;
+                          document.getElementById('submitBtn').disabled = !currentText;
+
+                          // Reset auto-submit timeout
+                          if (queryTimeout) {
+                              clearTimeout(queryTimeout);
+                          }
+
+                          queryTimeout = setTimeout(() => {
+                              submitCurrentQuery();
+                          }, 3000);
+                      }
+                  };
+
+                  recognition.onerror = (event) => {
+                      console.error('Speech recognition error:', event.error);
+                      stopListening();
+                  };
+              }
+
+              function toggleListening() {
+                  if (!recognition) {
+                      initSpeechRecognition();
+                  }
+
+                  if (isListening) {
+                      stopListening();
+                  } else {
+                      startListening();
+                  }
+              }
+
+              function startListening() {
+                  recognition.start();
+                  isListening = true;
+                  document.getElementById('status').textContent = 'Listening...';
+                  document.getElementById('toggleBtn').textContent = 'Stop Listening';
+                  document.getElementById('status').style.background = '#e8f5e9';
+              }
+
+              function stopListening() {
+                  if (recognition) {
+                      recognition.stop();
+                  }
+                  isListening = false;
+                  document.getElementById('status').textContent = 'Not listening';
+                  document.getElementById('toggleBtn').textContent = 'Start Listening';
+                  document.getElementById('status').style.background = '#e0e0e0';
+              }
+
+              function submitCurrentQuery() {
+                  if (!currentText) return;
+
+                  if (queryTimeout) {
+                      clearTimeout(queryTimeout);
+                  }
+
+
+                  showLoadingScreen();
+
+                  fetch('/query_mongodb', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ "text":currentText,"n":resultLimit })
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                      document.getElementById('result-div').style.display = 'block';
+                      hideLoadingScreen();
+                      displayResponse(data.results);
+                      // document.getElementById('result').textContent = JSON.stringify(data.results, null, 2);
+                  })
+                  .catch(error => {
+                      console.error('Query error:', error);
+                      document.getElementById('result').textContent = 'Error executing query';
+                  });
+
+                  // Clear current text
+                  currentText = '';
+                  document.getElementById('currentText').textContent = '';
+                  document.getElementById('submitBtn').disabled = true;
+              }
+
+
+              function displayResponse(data) {
+                  const imagesSection = document.getElementById('imagesSection');
+                  const textSection = document.getElementById('textSection');
+
+                  // Clear existing content
+                  imagesSection.innerHTML = '';
+                  textSection.innerHTML = '';
+
+                  // Display images
+                  data.img.forEach(img => {
+                      const imageCard = document.createElement('div');
+                      imageCard.className = 'image-card';
+                      imageCard.innerHTML = `
+                          <img src="${img['image-path']}" alt="Query result image">
+                          <div class="image-description">${img.description}</div>
+                      `;
+                      imagesSection.appendChild(imageCard);
+                  });
+
+                  // Display text content
+                  data.txt.forEach((text,index) => {
+                      const textCard = document.createElement('div');
+                      textCard.className = 'text-card';
+                      textCard.innerHTML = `
+                          <div class="text-header">
+                            <div class="page-label my-2"><strong>Source:</strong> ${text.pdf}</div>
+                            <div class="page-label h5 text-decoration-underline">Page ${text['page no']}</div>
+                          </div>
+                          <div id="result-${index}" class="text-content">${text.text}</div>
+                          <hr>
+                      `;
+
+                      textSection.appendChild(textCard);
+                  });
+                  textSection.childNodes.forEach((element)=>{
+                      element.addEventListener('click',(e)=>{
+                          selectedText = e.target.innerHTML;
+                          selectedId = e.target.id;
+                          showTranslate();
+                          console.log(selectedText,selectedId)
+                      })
+                  })
+              }
+
+              function readAloud(text) {
+          // Check if the browser supports speech synthesis
+          if ('speechSynthesis' in window) {
+              utterance = new SpeechSynthesisUtterance(text);
+
+              // Optionally set voice properties like pitch, rate, and volume
+              utterance.pitch = 1; // Range is from 0 to 2
+              utterance.rate = 1;  // Range is from 0.1 to 10
+              utterance.volume = 1; // Range is from 0 to 1
+
+              // Speak the text
+              window.speechSynthesis.speak(utterance);
+          } else {
+              console.log("Speech synthesis is not supported in this browser.");
+          }
+      }
+
+      function stopReadingAloud() {
+          if ('speechSynthesis' in window) {
+              if (window.speechSynthesis.speaking) {
+                  window.speechSynthesis.cancel(); // Stop all ongoing utterances
+                  currentUtterance = null; // Clear the reference
+                  console.log("Speech synthesis stopped.");
+              } else {
+                  console.log("No speech is currently active.");
+              }
+          }
+      }
+
+    function showTranslate(){
+        var elem = document.getElementById('google_translate_element');
+        elem.style.display = "block";
+    }
+
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({ pageLanguage: 'en' }, 'google_translate_element');
+    }
+
+    let translated;
+  // Function to set up the event listener
+  function attachEventListener() {
+    const selectElement = document.querySelector('.goog-te-combo');
+
+    if (selectElement) {
+        console.log('Select element found. Adding event listener.');
+        
+        selectElement.addEventListener('change', function (event) {
+            console.log('Select element value changed.');
+
+            const iframe = document.querySelector('iframe');
+
+            if (iframe) {
+                console.log('Iframe found.');
+                
+                iframe.style.display = "none";
+                links = iframe.contentDocument.getElementsByTagName('a');
+                // console.log(iframe.contentDocument);
+                elem = iframe.contentDocument;
+                if(elem){
+                  monitorElementChanges(selectedId,elem);
+                }else{
+                  console.log('links not found');
+                }
+                
+            } else {
+                console.error('Iframe not found.');
+            }
+        });
+    } else {
+        console.error('Select element not found.');
+    }
+}
+
+
+
+function monitorElementChanges(elementId, elem) {
+    const targetElement = document.getElementById(elementId);
+    console.log('Target element for monitoring:', targetElement);
+
+    if (!targetElement) {
+        console.error(`Element with ID "${elementId}" not found.`);
+        return;
+    }
+    let translated = targetElement.innerText;
+
+    let interval = setInterval(()=>{
+      console.log(targetElement.innerText);
+      if(translated != targetElement.innerText){
+        done = targetElement.innerText;
+        clearInterval(interval);
+        console.log(elem.getElementsByTagName('a')[2]);
+        elem.getElementsByTagName('a')[2] .click();
+        targetElement.innerText = done;
+        document.querySelector("#goog-gt-vt")?.remove();
+      }
+    },500);
+    window.scrollTo({
+        top: document.body.scrollHeight, // Scroll to the total height of the document for trigering the changes in the selected element
+        behavior: 'smooth' // Optional: Adds a smooth scrolling effect
+    });
+
+    console.log(`Observer started for element with ID "${elementId}".`);
+}
+
+  // Use MutationObserver to detect when the .goog-te-combo element is added to the DOM
+  const observer = new MutationObserver((mutationsList, observer) => {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'childList') {
+        const selectElement = document.querySelector('.goog-te-combo');
+        if (selectElement) {  
+          selectElement.classList.add('form-control');
+          let d = document.createElement('label');
+          d.innerText = "select a language to translate";
+          selectElement.parentNode.appendChild(d);
+          s = document.getElementById(':0.targetLanguage').parentNode;
+          s.lastChild.remove();
+          s.lastChild.remove();
+          attachEventListener(); // Attach the event listener
+          observer.disconnect(); // Stop observing once the element is found
+          break;
+        }
+      }
+    }
+  });
+
+  // Start observing the DOM for changes
+  observer.observe(document.body, { childList: true, subtree: true });
+    
+  function showLoadingScreen() {
+    document.body.classList.add('loading');
+    document.getElementById('top').style.display = "none";
+}
+
+function hideLoadingScreen() {
+    document.body.classList.remove('loading');
+    document.getElementById('top').style.display = "block";
+}
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <!-- Required Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+  </body>
+</html>
